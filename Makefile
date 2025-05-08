@@ -8,7 +8,7 @@ LIB        := lib
 
 INCLUDES   := $(addprefix -I,$(wildcard lib/* lib/*/include lib))
 LIBS       := `pkg-config --cflags --libs opencv4` -lmpfr -lgmp
-OPT        := -O2
+OPT        := -Ofast
 
 CXX        := clang++
 CXXFLAGS   := $(CPPFLAGS) $(OPT) $(LIBS) -std=c++20 -g -MMD $(INCLUDES) -Wno-unused-command-line-argument

@@ -28,27 +28,37 @@ public:
         Real targetVolume = target_mesh.meshVolume();
         int  numTries = 0;
 
-        PRINT("Begin packing mesh");
+        Real zScale = 1.0;
 
+        PRINTDIV();
+        PRINT("Begin packing mesh...");
         while (true) {
             auto position = find_random_position();
-            auto tile = spawn_random_tile(position);
+            auto tile = spawn_random_tile(position, 1.0 / zScale);
+            Real msr = min_size_ratio;
 
             grow_tile(tile);
 
             Real tileVolume = tile.meshVolume();
 
-            if ( tileVolume / targetVolume >= min_size_ratio) {
+            if ( tileVolume / targetVolume >= msr) {
                 packed_tiles.push_back(tile);
                 numTries = 0;
-            } else if ( numTries <= 100 ) {
+            } else if ( numTries <= 1000 ) { //XXX
                 // If the tile is too small, discard it and try again
+                // unless we've run out of tries
                 numTries += 1;
                 continue;
-            } else {
+            } else if ( zScale >= 3 ) {
                 Real totalVolume = calculate_total_packed_volume();
-                PRINTFn("Terminated early. Tile #%zu: %f volume ratio", packed_tiles.size(), totalVolume / targetVolume);
+                PRINTFn("Terminated. Tiles: %zu. %f volume ratio", packed_tiles.size(), totalVolume / targetVolume);
                 break;
+            } else {
+                zScale  += 1.0;
+                PRINTFn("[i] Increase zScale to %f", zScale);
+                msr /= 2;
+                numTries = 0;
+                continue;
             }
 
 
@@ -61,14 +71,15 @@ public:
         }
     }
 
-    Mesh spawn_random_tile(VEC3F position) {
+    Mesh spawn_random_tile(VEC3F position, Real zScale = 1.0) {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, tile_meshes.size() - 1);
 
         Mesh tile = tile_meshes[dis(gen)];
         tile.setCentroid(position);
-        tile.scaleMesh(0.0001);
+        tile.scaleMeshZ(zScale);
+        tile.scaleMeshXY(0.0001);
 
         return tile;
     }
@@ -78,12 +89,12 @@ public:
         int  iters = 0;
         const Real growth_rate = 0.1;
         while (!check_collision(tile)) {
-            tile.scaleMesh(1.0 + growth_rate);
+            tile.scaleMeshXY(1.0 + growth_rate);
             scale *= (1.0 + growth_rate);
             iters++;
         }
         // PRINTFn(" -> Collided! (scale: %f, iters: %d, volume ratio: %f)", scale, iters, tile.meshVolume() / target_mesh.meshVolume());
-        tile.scaleMesh(1.0 / (1.0 + growth_rate)); // Revert the last growth
+        tile.scaleMeshXY(1.0 / (1.0 + growth_rate)); // Revert the last growth
     }
 
     bool check_collision(const Mesh& tile) {

@@ -6,6 +6,8 @@
 #include "Eigen/Geometry"
 #include <fstream>
 #include <chrono>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 using namespace Eigen;
 
@@ -37,6 +39,14 @@ typedef VectorXd VECTOR;
 #define PRINTF(format, ...) if (DEBUGBOOL) {fprintf(stderr, "%s:%d (%s)\t| ", __FILE__, __LINE__, __func__); fprintf(stderr, format, ## __VA_ARGS__);}
 #define PRINTFn(format, ...) if (DEBUGBOOL) {fprintf(stderr, "%s:%d (%s)\t| ", __FILE__, __LINE__, __func__); fprintf(stderr, format, ## __VA_ARGS__); fprintf(stderr, "\n");}
 #define PRINT(x) if (DEBUGBOOL) {fprintf(stderr, "%s:%d (%s)\t| ", __FILE__, __LINE__, __func__); fprintf(stderr, x); fprintf(stderr, "\n");}
+
+// Print a divider
+#define PRINTDIV() if (DEBUGBOOL) { \
+    struct winsize w; \
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w); \
+    for (int i = 0; i < w.ws_col; i++) fprintf(stderr, "="); \
+    fprintf(stderr, "\n"); \
+}
 
 // Here!
 #define HERE() PRINT("here!")

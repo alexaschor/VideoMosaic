@@ -135,7 +135,7 @@ namespace MC
       \param x, y, z current slab index
       \param size slab indices array size
       */
-    static void mc_internalComputeEdge(VEC3I* slab_inds, Mesh& mesh, Grid3D* grid, float va, float vb, int axis, uint x, uint y, uint z, const VEC3I& size)
+    static void mc_internalComputeEdge(VEC3I* slab_inds, MCMesh& mesh, Grid3D* grid, float va, float vb, int axis, uint x, uint y, uint z, const VEC3I& size)
     {
         if ((va < 0.0) == (vb < 0.0))
             return;
@@ -176,7 +176,7 @@ namespace MC
       \param mesh the mesh
       \param a, b, c vertex indices
       */
-    static inline void mc_internalAccumulateNormal(Mesh& mesh, uint a, uint b, uint c)
+    static inline void mc_internalAccumulateNormal(MCMesh& mesh, uint a, uint b, uint c)
     {
         VEC3F& va = mesh.vertices[a];
         VEC3F& vb = mesh.vertices[b];
@@ -211,7 +211,7 @@ namespace MC
       \param outputMesh indexed mesh returned.
       \param verbose if true, prints progress updates
       */
-    inline void march_cubes(Grid3D *grid, Mesh& outputMesh, bool verbose = false) {
+    inline void march_cubes(Grid3D *grid, MCMesh& outputMesh, bool verbose = false) {
 
         uint nx = grid->xRes;
         uint ny = grid->yRes;
@@ -338,6 +338,7 @@ namespace MC
         for (size_t i = 0; i < outputMesh.normals.size(); i++)
             outputMesh.normals[i] = mc_internalNormalize(outputMesh.normals[i]);
 
+        outputMesh.finalize();
     }
 
 }
